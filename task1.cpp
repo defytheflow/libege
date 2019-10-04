@@ -45,7 +45,7 @@ public:
         std::map<std::string, std::string> bin_to_hex_table = {
             {"0000", "0"}, {"0001", "1"}, {"0010", "2"}, {"0011", "3"},
             {"0100", "4"}, {"0101", "5"}, {"0110", "6"}, {"0111", "7"},
-            {"0100", "8"}, {"0101", "9"}, {"1010", "A"}, {"1011", "B"},
+            {"1000", "8"}, {"1001", "9"}, {"1010", "A"}, {"1011", "B"},
             {"1100", "C"}, {"1101", "D"}, {"1110", "E"}, {"1111", "F"},
         };
 
@@ -156,7 +156,7 @@ public:
         std::map<char, std::string> hex_to_bin_table = {
             {'0', "0000"}, {'1', "0001"}, {'2', "0010"}, {'3', "0011"},
             {'4', "0100"}, {'5', "0101"}, {'6', "0110"}, {'7', "0111"},
-            {'8', "0100"}, {'9', "0101"}, {'A', "1010"}, {'B', "1011"},
+            {'8', "1000"}, {'9', "1001"}, {'A', "1010"}, {'B', "1011"},
             {'C', "1100"}, {'D', "1101"}, {'E', "1110"}, {'F', "1111"},
         };
         for (const auto &ch : hex_num)
@@ -189,6 +189,21 @@ public:
         }
         return std::to_string(dec_num);
     }
+
+    static std::string dec_to_triple(std::string dec_num)
+    {
+        constexpr int base_into {3};
+        std::string triple_num;
+        // Collect all the remainders
+        int dec_num_i {std::stoi(dec_num)};
+        for (;dec_num_i != 0; dec_num_i /= base_into)
+        {
+            int remainder {dec_num_i % base_into};
+            triple_num.append(std::to_string(remainder));
+        }
+        std::reverse(triple_num.begin(), triple_num.end());
+        return triple_num;
+    }   
 private:
     static void pad_zeros(std::string &bin_num)
     {
@@ -215,28 +230,68 @@ private:
     }
 };
 
+int count(const std::string str, const char ch)
+{
+    int count {};
+    for (const auto &el : str)
+    {
+        if (el == ch)
+            ++count;
+    }
+    return count;
+}
+
+int count_bigger_than(const std::vector<std::string> &hex_nums, const std::string oct_num)
+{
+    int count {};
+    for(const auto &hex_num : hex_nums)
+    {
+        if (Converter::hex_to_dec(hex_num) > Converter::oct_to_dec(oct_num))
+            ++count;
+    }
+    return count;
+}
+
+int count_from_to(int from, int to, int howmany1s)
+{
+    int count_ {};
+    for (int i = {from}; i <= to; ++i)
+    {
+        string bin_num {Converter::dec_to_bin(std::to_string(i))};
+        if (count(bin_num, '1') > howmany1s)
+            ++count_;
+    }
+    return count_;
+}
+
+int count_whole_numbers(std::string oct_from, std::string hex_to)
+{
+
+    int dec_from {std::stoi(Converter::oct_to_dec(oct_from))};
+    int dec_to {std::stoi(Converter::hex_to_dec(hex_to))};
+
+    return dec_to - dec_from + 1;
+}
+
 int main(int argc, char *argv[])
 {
-    // if (argc != 4)
-    //     error("Usage: ./ege_solver <number> <base> <base_into>");
-
-    // int num {std::stoi(argv[1])};
-    // int base {std::stoi(argv[2])};
-    // int base_into {std::stoi(argv[3])};
-
-    // cout << "Binary " << Converter::dec_to_bin(num) << endl;
-    // cout << "Octal " <<Converter::dec_to_oct(num) << endl;
-    // cout << "Hexadecimal " <<Converter::dec_to_hex(num) << endl;
-    // PRINT(Converter::oct_to_bin(argv[1]));
+    // 1 task works
+    // string bin_num {Converter::oct_to_bin("345")};
+    // PRINT(count(bin_num, '1'));    
     
-    string num {"AEEF"};
+    // 2 task works
+    // PRINT(count_bigger_than({"A8", "AB", "B4", "BA"},"264"))
 
-    string bin_num {Converter::hex_to_bin(num)};
-    string oct_num {Converter::hex_to_oct(num)};
-    string dec_num {Converter::hex_to_dec(num)};
-
-    PRINT(bin_num);
-    PRINT(oct_num);
-    PRINT(dec_num);
+    // PRINT(count(Converter::dec_to_triple("242"), '0'));
+    // PRINT(count(Converter::dec_to_bin("1040"),'1'));
+    // PRINT(count(Converter::dec_to_triple("243"), '1'));
+    // PRINT(count(Converter::dec_to_bin("254"),'0'));
+    // PRINT(count_from_to(10, 20, 2));
+    // PRINT(count_whole_numbers("156", "7E"));
+    // PRINT(std::stoi(Converter::oct_to_dec("157")) - std::stoi(Converter::bin_to_dec("1101011")));
+    // PRINT(std::stoi(Converter::hex_to_dec("9E")) - std::stoi(Converter::hex_to_dec("94")));
+    // PRINT(Converter::hex_to_oct("1A05"));
+    PRINT(count(Converter::hex_to_bin("7A15"), '0'));
     return 0;
 }
+
