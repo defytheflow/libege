@@ -34,6 +34,9 @@ int ctoi(char ch);
 // If dig is a one-character digit, returns it as a char. Otherwise returns '\0'.
 char itoc(int dig);
 
+// Returns true if first char of the num is '-'
+bool isNegative(const std::string &num);
+
 // Returns true if num consists only of '1' and/or '0' characters.
 bool isbin(const std::string &num);
 // Returns true if num consists only of [0-7] characters.
@@ -216,6 +219,11 @@ std::string oct_to_bin(std::string &oct_num)
 
 std::string dec_to_bin(std::string &dec_num_s)
 {
+    if (isNegative(dec_num_s))
+        return "";
+    else if (dec_num_s == "0")
+        return "0";
+
     std::string bin_num;
     // Collect all the remainders
     int dec_num_i {std::stoi(dec_num_s)};
@@ -225,7 +233,8 @@ std::string dec_to_bin(std::string &dec_num_s)
         bin_num.push_back(itoc(remainder));
     }
     std::reverse(bin_num.begin(), bin_num.end());
-    pad_zeros(bin_num);
+    // pad_zeros(bin_num);
+    drop_zeros(bin_num);
     return bin_num;
 }
 
@@ -414,6 +423,11 @@ char itoc(int dig)
     }
 }
 
+bool isNegative(const std::string &num)
+{
+    return num[0] == '-';
+}
+
 bool isbin(const std::string &num)
 {
     for (const auto &dig : num)
@@ -436,9 +450,11 @@ bool isoct(const std::string &num)
 
 bool isdec(const std::string &num)
 {
-    for (const auto &dig : num)
+    for (int i {0}, length = num.length(); i < length; ++i)
     {
-        if (!isdigit(dig))
+        if (num[i] == '-' && i == 0)
+            continue;
+        else if (!isdigit(num[i]))
             return false;
     }
     return true;
