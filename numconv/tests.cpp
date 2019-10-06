@@ -6,7 +6,6 @@ TEST(Testing_bin_function, Binary_values)
     ASSERT_EQ("0", bin("0", BINARY));
     ASSERT_EQ("-10101010", bin("-10101010", BINARY));
     ASSERT_EQ("11110", bin("11110", BINARY));
-     
 }
 
 TEST(Testing_bin_function, Decimal_values)
@@ -41,6 +40,14 @@ TEST(Testing_bin_function, Hexadecimal_values)
     ASSERT_EQ("11100100101", bin("725", HEXADECIMAL));
     ASSERT_EQ("-10101100", bin("-AC", HEXADECIMAL));
     ASSERT_EQ("1010111000010010", bin("AE12", HEXADECIMAL));
+}
+
+TEST(Testing_oct_function, Octal_values)
+{
+    ASSERT_EQ("0", oct("0", OCTAL));
+    ASSERT_EQ("-7", oct("-7", OCTAL));
+    ASSERT_EQ("127", oct("127", OCTAL));
+    ASSERT_EQ("-212", oct("-212", OCTAL));
 }
 
 int main(int argc, char **argv)

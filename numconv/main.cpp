@@ -5,7 +5,10 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    string num {"-4"};
-    PRINT(bin(num, HEXADECIMAL));
+    Binary x {24};
+    Binary y {85};
+    PRINT(x);
+    PRINT(y);
+    PRINT(x + y);
     return 0;
 }

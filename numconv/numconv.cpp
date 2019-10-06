@@ -56,36 +56,40 @@ bool ishex(const std::string &num);
  *                         EXCEPTIONS                            *
  *****************************************************************/ 
 
-class NotImplemented
-{
-private:
-    std::string m_message;
-public:
-    NotImplemented(std::string message):
-    m_message{message}
-    {
-    }
-    std::string get_message() const
-    {
-        return m_message;
-    }
-};
+class NotImplementedYet {};
 
 /*****************************************************************
  *               IMPLEMENTATION OF MAIN CLASSES                  *
  *****************************************************************/ 
+Binary::Binary() {}
 
 // This constructor is used if number to convert is passed as a string
 Binary::Binary(std::string val)
 {
-    m_val = bin(val, BINARY);
+    m_val = bin(val, DECIMAL);
 }
 
 Binary::Binary(int val)
 {
-    m_val = bin(std::to_string(val), BINARY);
+    m_val = bin(std::to_string(val), DECIMAL);
 }
 
+Binary Binary::operator+(Binary const &other)
+{
+    PRINT("Inside Binary::operator+");
+    throw NotImplementedYet();
+}
+
+std::string Binary::get_value() const
+{
+    return m_val;
+}
+
+std::ostream& operator<<(std::ostream &os, const Binary &b)
+{
+    os << b.m_val;
+    return os;
+}
 /*****************************************************************
  *           DEFINITIONS OF MAIN PUBLIC FUNCTIONS                *
  *****************************************************************/ 
@@ -523,10 +527,20 @@ bool isbin(const std::string &num)
 
 bool isoct(const std::string &num)
 {
-    for (const auto &dig : num)
+    for (int i = 0, length = num.length(); i < length; ++i)
     {
-        if (dig == '8' || dig == '9')
-            return false;
+        if (i == 0 && num[i] == '-') continue;
+
+        switch(num[i])
+        {
+            case '0': case '1': 
+            case '2': case '3':
+            case '4': case '5': 
+            case '6': case '7':
+                continue;
+            default:
+                return false;
+        }
     }
     return true;
 }
