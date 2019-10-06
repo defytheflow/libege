@@ -1,4 +1,4 @@
-#include "num_conv.h"
+#include "numconv.h"
 
 /*****************************************************************
  *          FORWARD DECLARATIONS OF ALL HELPER FUNCTIONS         *
@@ -7,6 +7,7 @@
 // Functions to convert a number to BINARY.
 std::string oct_to_bin(std::string &oct_num);
 std::string dec_to_bin(std::string &dec_num_s);
+std::string neg_dec_to_bin(std::string num);
 std::string hex_to_bin(std::string &hex_num);
 
 // Functions to convert a number to OCTAL.
@@ -29,13 +30,18 @@ void pad_zeros(std::string &bin_num);
 // Removes zeros from the front of the binary if binary is not a multiple of 4.
 void drop_zeros(std::string &bin_num);
 
+// Changes '1' characters to '0' characters and vice versa.
+void invert_bits(std::string &bin_num);
+// Changes '1' char to '0' char and vice versa.
+char invert_bit(char bit);
+
 // If ch is a digit, returns it as an integer. Otherwise returns -1.
 int ctoi(char ch);
 // If dig is a one-character digit, returns it as a char. Otherwise returns '\0'.
 char itoc(int dig);
 
 // Returns true if first char of the num is '-'
-bool isNegative(const std::string &num);
+bool isneg(const std::string &num);
 
 // Returns true if num consists only of '1' and/or '0' characters.
 bool isbin(const std::string &num);
@@ -47,11 +53,46 @@ bool isdec(const std::string &num);
 bool ishex(const std::string &num);
 
 /*****************************************************************
+ *                         EXCEPTIONS                            *
+ *****************************************************************/ 
+
+class NotImplemented
+{
+private:
+    std::string m_message;
+public:
+    NotImplemented(std::string message):
+    m_message{message}
+    {
+    }
+    std::string get_message() const
+    {
+        return m_message;
+    }
+};
+
+/*****************************************************************
+ *               IMPLEMENTATION OF MAIN CLASSES                  *
+ *****************************************************************/ 
+
+// This constructor is used if number to convert is passed as a string
+Binary::Binary(std::string val)
+{
+    m_val = bin(val, BINARY);
+}
+
+Binary::Binary(int val)
+{
+    m_val = bin(std::to_string(val), BINARY);
+}
+
+/*****************************************************************
  *           DEFINITIONS OF MAIN PUBLIC FUNCTIONS                *
  *****************************************************************/ 
 
 std::string bin(std::string num, int base)
 {
+    if (num == "0") return "0";
     switch (base)
     {
         case BINARY:
@@ -213,30 +254,50 @@ std::string oct_to_bin(std::string &oct_num)
     {
         bin_num.append(oct_to_bin_table[dig]);
     }
-    pad_zeros(bin_num);
+    drop_zeros(bin_num);
+
+    if (isneg(oct_num))
+        bin_num.insert(0, "-");
+
     return bin_num;
 }
 
 std::string dec_to_bin(std::string &dec_num_s)
 {
-    if (isNegative(dec_num_s))
-        return "";
-    else if (dec_num_s == "0")
-        return "0";
-
     std::string bin_num;
+    int dec_num_i {};
+
+    if (isneg(dec_num_s))
+        dec_num_i = std::stoi(dec_num_s.substr(1, dec_num_s.length()-1));
+    else
+        dec_num_i = std::stoi(dec_num_s);
+   
     // Collect all the remainders
-    int dec_num_i {std::stoi(dec_num_s)};
     for (;dec_num_i != 0; dec_num_i /= BINARY)
     {
         int remainder {dec_num_i % BINARY};
         bin_num.push_back(itoc(remainder));
     }
     std::reverse(bin_num.begin(), bin_num.end());
-    // pad_zeros(bin_num);
     drop_zeros(bin_num);
+    
+    if (isneg(dec_num_s))
+        bin_num.insert(0, "-");
+
     return bin_num;
 }
+
+// std::string neg_dec_to_bin(std::string num)
+// {
+//     //throw NotImplemented("neg_dec_to_bin() has not been implemented yet.");
+//     // First we convert it as a positive number into BINARY
+//     // we start with 1 because first char is '-'
+//     std::string pos_bin_num {bin(num.substr(1, num.length()-1), DECIMAL)};
+//     // Then we invert all the bits
+//     invert_bits(pos_bin_num);
+//     // Now add 1 to the pos_bin_num
+//     return bin(std::to_string(std::stoi(dec(pos_bin_num, BINARY)) + 1), DECIMAL);
+// }
 
 std::string hex_to_bin(std::string &hex_num)
 {
@@ -251,7 +312,11 @@ std::string hex_to_bin(std::string &hex_num)
     {
         bin_num.append(hex_to_bin_table[dig]);
     }
-    pad_zeros(bin_num);
+    drop_zeros(bin_num);
+
+    if (isneg(hex_num))
+        bin_num.insert(0, "-");
+
     return bin_num;
 }
 
@@ -295,7 +360,7 @@ std::string bin_to_dec(std::string &bin_num)
 {
     int dec_num {};
     std::reverse(bin_num.begin(), bin_num.end());
-    for (int i {0}, length {bin_num.length()}; i < length; ++i)
+    for (int i {0}, length = bin_num.length(); i < length; ++i)
     {
         dec_num += ctoi(bin_num[i]) * std::pow(BINARY, i);
     }
@@ -306,7 +371,7 @@ std::string oct_to_dec(std::string &oct_num)
 {
     int dec_num {};
     std::reverse(oct_num.begin(), oct_num.end());
-    for (int i {0}, length {oct_num.length()}; i < length; ++i)
+    for (int i {0}, length = oct_num.length(); i < length; ++i)
     {
         dec_num += ctoi(oct_num[i]) * std::pow(OCTAL, i);
     }
@@ -380,6 +445,10 @@ std::string dec_to_hex(std::string &dec_num_s)
 }
 
 /*****************************************************************
+ *                  ARITHMETIC OPERATIONS                        *
+ *****************************************************************/ 
+
+/*****************************************************************
  *                     HELPER FUNCTIONS                          *
  *****************************************************************/ 
 
@@ -396,12 +465,24 @@ void drop_zeros(std::string &bin_num)
     // If bin_num doesn't start with 0 - we can't drop any zeros.
     if (bin_num[0] != '0') return;
 
-    while (bin_num[0] == '0' && bin_num.length() % 4 != 0)
+    while (bin_num[0] == '0') // && bin_num.length() % 4 != 0)
     {
         bin_num.erase(0, 1);
     }
 }
 
+void invert_bits(std::string &bin_num)
+{
+    for (auto &dig: bin_num)
+    {
+        dig == '0' ? dig = '1' : dig = '0';
+    }
+}
+
+char invert_bit(char bit)
+{
+    return bit == '0' ? '1' : '0';
+}
 
 int ctoi(char ch)
 {
@@ -423,16 +504,18 @@ char itoc(int dig)
     }
 }
 
-bool isNegative(const std::string &num)
+bool isneg(const std::string &num)
 {
     return num[0] == '-';
 }
 
 bool isbin(const std::string &num)
 {
-    for (const auto &dig : num)
+    for (int i = 0, length = num.length(); i < length; ++i)
     {
-        if (dig != '1' || dig != '0')
+        if (i == 0 && num[i] == '-') continue;
+
+        else if (num[i] != '1' && num[i] != '0')
             return false;
     }
     return true;
@@ -452,19 +535,18 @@ bool isdec(const std::string &num)
 {
     for (int i {0}, length = num.length(); i < length; ++i)
     {
-        if (num[i] == '-' && i == 0)
-            continue;
-        else if (!isdigit(num[i]))
-            return false;
+        if (i == 0 && num[i] == '-') continue;
+        else if (!isdigit(num[i])) return false;
     }
     return true;
 }
 
 bool ishex(const std::string &num)
 {
-    for (const auto &dig : num)
+    for (int i {0}, length = num.length(); i < length; ++i)
     {
-        switch (dig)
+        if (i == 0 && num[i] == '-') continue;
+        switch (num[i])
         {
             case '0': case '1': 
             case '2': case '3':
