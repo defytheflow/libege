@@ -1,5 +1,23 @@
 #include "numconv.h"
 
+#define BINARY 2
+#define OCTAL 8
+#define DECIMAL 10
+#define HEXADECIMAL 16
+
+#define POS_BIN_PREFIX "0b"
+#define NEG_BIN_PREFIX "-0b"
+
+#define POS_OCT_PREFIX "0o"
+#define NEG_OCT_PREFIX "-0o"
+
+#define POS_HEX_PREFIX "0x"
+#define NEG_HEX_PREFIX "-0x"
+
+#define BIN_ZERO "0b0"
+#define OCT_ZERO "0o0"
+#define HEX_ZERO "0x0"
+
 /*****************************************************************
  *          FORWARD DECLARATIONS OF ALL HELPER FUNCTIONS         *
  *****************************************************************/ 
@@ -72,7 +90,7 @@ bool check_hex_prefix(const std::string &num);
  *****************************************************************/ 
 
 class NotImplementedYet {};
-class InvalidBase {};
+class InvalidLiteral {};
 
 /*****************************************************************
  *               IMPLEMENTATION OF MAIN CLASSES                  *
@@ -112,8 +130,6 @@ class InvalidBase {};
 
 std::string bin(std::string num)
 {
-    if (num == "0") return "0";
-
     if (isbin(num))
         return num;
     else if (isoct(num))
@@ -123,14 +139,12 @@ std::string bin(std::string num)
     else if (ishex(num))
         return hex_to_bin(num);
     else  
-        throw InvalidBase();
+        throw InvalidLiteral();
 }
 
 
 std::string oct(std::string num)
 {
-    if (num == "0") return "0";
-
     if (isbin(num))
         return bin_to_oct(num);
     else if (isoct(num))
@@ -140,13 +154,11 @@ std::string oct(std::string num)
     else if (ishex(num))
         return hex_to_oct(num);
     else
-        throw InvalidBase();
+        throw InvalidLiteral();
 }
 
 std::string dec(std::string num)
 {
-    if (num == "0") return "0";
-
     if (isbin(num))
         return bin_to_dec(num);
     else if (isoct(num))
@@ -156,13 +168,11 @@ std::string dec(std::string num)
     else if (ishex(num))
         return hex_to_dec(num);
     else
-        throw InvalidBase();
+        throw InvalidLiteral();
 }
 
 std::string hex(std::string num)
 {
-    if (num == "0") return "0";
-
     if (isbin(num))
         return bin_to_hex(num);
     else if (isoct(num))
@@ -172,7 +182,7 @@ std::string hex(std::string num)
     else if (ishex(num))
         return num;
     else
-        throw InvalidBase();
+        throw InvalidLiteral();
 }
 
 /*****************************************************************
@@ -181,6 +191,7 @@ std::string hex(std::string num)
  
 std::string oct_to_bin(std::string oct_num)
 {
+    if (oct_num == OCT_ZERO) return BIN_ZERO;
     bool neg {isneg(oct_num)};
     rm_prefix(oct_num);
 
@@ -200,6 +211,7 @@ std::string oct_to_bin(std::string oct_num)
 
 std::string dec_to_bin(std::string dec_num_s)
 {
+    if (dec_num_s == "0") return BIN_ZERO;
     bool neg {isneg(dec_num_s)};
     std::string bin_num;
     int dec_num_i {};
@@ -223,6 +235,7 @@ std::string dec_to_bin(std::string dec_num_s)
 
 std::string hex_to_bin(std::string hex_num)
 {
+    if (hex_num == HEX_ZERO) return BIN_ZERO;
     bool neg {isneg(hex_num)};
     rm_prefix(hex_num);
 
@@ -248,6 +261,7 @@ std::string hex_to_bin(std::string hex_num)
  
 std::string bin_to_oct(std::string bin_num)
 {
+    if (bin_num == BIN_ZERO) return OCT_ZERO;
     bool neg {isneg(bin_num)};
     rm_prefix(bin_num);
     // First convert binary into decimal;
@@ -258,6 +272,7 @@ std::string bin_to_oct(std::string bin_num)
 
 std::string dec_to_oct(std::string dec_num_s)
 {
+    if (dec_num_s == "0") return OCT_ZERO;
     bool neg {isneg(dec_num_s)};
     std::string oct_num;
     // Collect all the remainders
@@ -280,6 +295,7 @@ std::string dec_to_oct(std::string dec_num_s)
 
 std::string hex_to_oct(std::string hex_num)
 {
+    if (hex_num == HEX_ZERO) return OCT_ZERO;
     bool neg {isneg(hex_num)};
     rm_prefix(hex_num);
     std::string dec_num_s {neg ? "-" + hex_to_dec(hex_num) : hex_to_dec(hex_num)};
@@ -292,6 +308,7 @@ std::string hex_to_oct(std::string hex_num)
 
 std::string bin_to_dec(std::string bin_num)
 {
+    if (bin_num == BIN_ZERO) return "0";
     bool neg {isneg(bin_num)};
     rm_prefix(bin_num);
     int dec_num_i {};
@@ -306,6 +323,7 @@ std::string bin_to_dec(std::string bin_num)
 
 std::string oct_to_dec(std::string oct_num)
 {
+    if (oct_num == OCT_ZERO) return "0";
     bool neg {isneg(oct_num)};
     rm_prefix(oct_num);
     int dec_num_i {};
@@ -320,6 +338,7 @@ std::string oct_to_dec(std::string oct_num)
 
 std::string hex_to_dec(std::string hex_num)
 {
+    if (hex_num == BIN_ZERO) return "0";
     bool neg {isneg(hex_num)};
     rm_prefix(hex_num);
     int dec_num_i {};
@@ -344,6 +363,7 @@ std::string hex_to_dec(std::string hex_num)
 
 std::string bin_to_hex(std::string bin_num)
 {
+    if (bin_num == BIN_ZERO) return HEX_ZERO;
     bool neg {isneg(bin_num)};
     rm_prefix(bin_num);
     std::string hex_num;
@@ -364,6 +384,7 @@ std::string bin_to_hex(std::string bin_num)
 
 std::string oct_to_hex(std::string oct_num)
 {
+    if (oct_num == OCT_ZERO) return HEX_ZERO;
     bool neg {isneg(oct_num)};
     rm_prefix(oct_num);
     std::string bin_num {neg ? "-" + oct_to_bin(oct_num) : oct_to_bin(oct_num)};
@@ -373,6 +394,7 @@ std::string oct_to_hex(std::string oct_num)
 
 std::string dec_to_hex(std::string dec_num_s)
 {
+    if (dec_num_s == "0") return HEX_ZERO;
     bool neg {isneg(dec_num_s)};   
     std::string hex_num;
     std::map<int, char> dec_to_hex_table = {
@@ -381,7 +403,7 @@ std::string dec_to_hex(std::string dec_num_s)
         {8, '8'}, {9, '9'}, {10, 'A'}, {11, 'B'},
         {12, 'C'}, {13, 'D'}, {14, 'E'}, {15, 'F'},
     };
-    
+
     int dec_num_i {};
     if (neg) // Ignore first '-' character when trasformins string into an int
         dec_num_i = std::stoi(dec_num_s.substr(1, dec_num_s.length()-1));
@@ -568,7 +590,7 @@ void rm_prefix(std::string &num)
         }
     }
 }
-
+// TODO maybe a bug here: 'Why does it check only positive prefixes?'
 bool hasprefix(std::string &num)
 {
     std::string prefix = num.substr(0, 2);
