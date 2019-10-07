@@ -5,9 +5,10 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    
-    PRINT(hex("0o000000000000071"));
-    // add prefixes 0b 0o ox when transforming other bases 
-    // work on correct and informative exceptions
+    Bin x {"24"}, y {"10"};
+    cout << "Addition: " << x << " + " << y << " = " << x + y << endl;
+    cout << "Subtraction: " << x << " - " << y << " = " << x - y << endl;
+    cout << "Multiplication: " << x << " * " << y << " = " << x * y << endl;
+    cout << "Division: " << x << " / " << y << " = " << x / y << endl;
     return 0;
 }

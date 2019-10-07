@@ -95,35 +95,57 @@ class InvalidLiteral {};
 /*****************************************************************
  *               IMPLEMENTATION OF MAIN CLASSES                  *
  *****************************************************************/ 
-// Binary::Binary() {}
+Bin::Bin() {}
+// This constructor is used if number to convert is passed as a string
+Bin::Bin(std::string val)
+{
+    m_sval = bin(val);
+    m_ival = std::stoi(dec(m_sval));
+}
+// This constructor is udef if number to convert is passed as an int
+Bin::Bin(int val)
+{
+    m_sval = bin(std::to_string(val));
+    m_ival = std::stoi(dec(m_sval));
+}
+// Getters
+int Bin::get_ival() const { return m_ival; }
+std::string Bin::get_sval() const { return m_sval; }
 
-// // This constructor is used if number to convert is passed as a string
-// Binary::Binary(std::string val)
-// {
-//     m_val = bin(val);
-// }
+// Overloaded operators
+Bin Bin::operator+(Bin const &other) const
+{
+    std::string val;
+    val = bin(std::to_string(this->get_ival() + other.get_ival()));
+    return Bin{val};
+}
 
-// Binary::Binary(int val)
-// {
-//     m_val = bin(std::to_string(val), DECIMAL);
-// }
+Bin Bin::operator-(Bin const &other) const
+{
+    std::string val;
+    val = bin(std::to_string(this->m_ival - other.get_ival()));
+    return Bin{val};
+}
 
-// Binary Binary::operator+(Binary const &other)
-// {
-//     PRINT("Inside Binary::operator+");
-//     throw NotImplementedYet();
-// }
+Bin Bin::operator*(Bin const &other) const
+{
+    std::string val;
+    val = bin(std::to_string(this->m_ival * other.get_ival()));
+    return Bin{val};
+}
 
-// std::string Binary::get_value() const
-// {
-//     return m_val;
-// }
+Bin Bin::operator/(Bin const &other) const
+{
+    std::string val;
+    val = bin(std::to_string(this->m_ival / other.get_ival()));
+    return Bin{val};
+}
 
-// std::ostream& operator<<(std::ostream &os, const Binary &b)
-// {
-//     os << b.m_val;
-//     return os;
-// }
+std::ostream& operator<<(std::ostream &os, const Bin &b)
+{
+    os << b.m_sval;
+    return os;
+}
 /*****************************************************************
  *           DEFINITIONS OF MAIN PUBLIC FUNCTIONS                *
  *****************************************************************/ 
