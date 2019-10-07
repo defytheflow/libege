@@ -6,12 +6,12 @@
 #define DECIMAL 10
 #define HEXADECIMAL 16
 
-#define BIN_POS_PREFIX "0b"
-#define BIN_NEG_PREFIX "-0b"
-#define OCT_POS_PREFIX "0o"
-#define OCT_NEG_PREFIX "-0o"
-#define HEX_POS_PREFIX "0x"
-#define HEX_NEG_PREFIX "-0x"
+#define POS_BIN_PREFIX "0b"
+#define NEG_BIN_PREFIX "-0b"
+#define POS_OCT_PREFIX "0o"
+#define NEG_OCT_PREFIX "-0o"
+#define POS_HEX_PREFIX "0x"
+#define NEG_HEX_PREFIX "-0x"
 
 class Binary
 {
