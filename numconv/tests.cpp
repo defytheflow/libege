@@ -55,7 +55,7 @@ TEST(test_oct_function, hexadecimal_values)
     ASSERT_EQ("0o16", oct("0xE"));
 }
 /******************************************************/
-// dec() function tests.
+// dec(std::string) function tests.
 /******************************************************/
 TEST(test_dec_function, binary_values)
 {
@@ -80,6 +80,29 @@ TEST(test_dec_function, hexadecimal_values)
     ASSERT_EQ("0", dec("0x0"));
     ASSERT_EQ("-228", dec("-0xE4"));
     ASSERT_EQ("308", dec("0x134"));
+}
+/******************************************************/
+// dec(std::string, int base) function tests.
+/******************************************************/
+TEST(test_dec_function, different_bases)
+{
+    ASSERT_EQ("0", dec("0", 9));
+    ASSERT_EQ("-5", dec("-12", 3));
+    ASSERT_EQ("6", dec("12", 4));
+    ASSERT_EQ("-7", dec("-12", 5));
+    ASSERT_EQ("8", dec("12", 6));
+    ASSERT_EQ("9", dec("12", 7));
+    ASSERT_EQ("-11", dec("-12", 9));
+    ASSERT_EQ("13", dec("12", 11));
+    ASSERT_EQ("-14", dec("-12", 12));
+    ASSERT_EQ("15", dec("12", 13));
+    ASSERT_EQ("-16", dec("-12", 14));
+    ASSERT_EQ("17", dec("12", 15));
+
+    ASSERT_EQ("6", dec("0110", 2));
+    ASSERT_EQ("19", dec("23", 8));
+    ASSERT_EQ("10", dec("10", 10));
+    ASSERT_EQ("161", dec("A1", 16));
 }
 /******************************************************/
 // hex() function tests.
