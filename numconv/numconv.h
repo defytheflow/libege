@@ -4,9 +4,10 @@
 class Bin
 {
     private:
-        std::string m_sval;
+        std::string m_pre_sval;
+        std::string m_no_pre_sval;
         int m_ival;
-
+        
     public:
         /* Constructors */
         Bin();
@@ -19,14 +20,18 @@ class Bin
 
         /* Overloaded Operators */
         bool operator==(Bin const &other) const;
+        bool operator!=(Bin const &other) const;
         Bin operator+(Bin const &other) const;
         Bin operator-(Bin const &other) const;
         Bin operator*(Bin const &other) const;
         Bin operator/(Bin const &other) const;
+        char operator[](int at) const;
         friend std::ostream& operator<<(std::ostream &os, const Bin &b);
 
         /* Other methods */
-        int count(char ch) const;
+        // Returns number of bin digits in m_sval.
+        int size() const; 
+        int count(char what) const;
 };
 
 class Hex{};

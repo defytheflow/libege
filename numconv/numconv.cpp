@@ -145,23 +145,27 @@ Bin::Bin() {}
 // This constructor is used if number to convert is passed as a string
 Bin::Bin(std::string val)
 {
-    m_sval = bin(val);
-    m_ival = std::stoi(dec(m_sval));
+    m_pre_sval = bin(val);
+    m_no_pre_sval = rm_prefix(m_pre_sval);
+    m_ival = std::stoi(dec(m_pre_sval));
 }
 // This constructor is used if number to convert is passed as an int
 Bin::Bin(int val)
 {
-    m_sval = bin(std::to_string(val));
-    m_ival = std::stoi(dec(m_sval));
+    m_pre_sval = bin(std::to_string(val));
+    m_no_pre_sval = rm_prefix(m_pre_sval);
+    m_ival = std::stoi(dec(m_pre_sval));
 }
 /* GETTERS */
 
 int Bin::get_ival() const { return m_ival; }
-std::string Bin::get_sval() const { return m_sval; }
+std::string Bin::get_sval() const { return m_pre_sval; }
 
 /*  OVERLOADED OPERATORS */
 
 bool Bin::operator==(Bin const &other) const { return  m_ival == other.get_ival(); }
+
+bool Bin::operator!=(Bin const &other) const { return m_ival != other.get_ival(); }
 
 Bin Bin::operator+(Bin const &other) const { return Bin{m_ival + other.get_ival()}; }
 
@@ -171,15 +175,20 @@ Bin Bin::operator*(Bin const &other) const { return Bin{m_ival * other.get_ival(
 
 Bin Bin::operator/(Bin const &other) const { return Bin{m_ival / other.get_ival()}; }
 
-std::ostream& operator<<(std::ostream &os, const Bin &b) { os << b.m_sval; return os; }
+char Bin::operator[](int at) const { return m_no_pre_sval[at]; }
+
+std::ostream& operator<<(std::ostream &os, const Bin &b) { os << b.m_pre_sval; return os; }
 
 /* OTHER METHODS */
+
+// Returns number of bin digits in m_pre_sval.
+int Bin::size() const { return m_no_pre_sval.length(); }
 
 // Some tasks ask you to count '1' or '0' in the binary form of a particular number.
 int Bin::count(char what) const
 {
     int count {};
-    std::string sval = rm_prefix(m_sval);
+    std::string sval = rm_prefix(m_pre_sval);
     for (const char &dig : sval)
     {
         if (dig == what)
