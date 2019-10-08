@@ -35,6 +35,6 @@ std::string bin(std::string num);
 std::string oct(std::string num);
 std::string hex(std::string num);
 std::string dec(std::string num);
-std::string dec(std::string num, int base);
 
+std::string to_dec(std::string num, int base);
 std::string dec_to(std::string dec_num, int base_to);

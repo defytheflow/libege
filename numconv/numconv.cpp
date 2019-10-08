@@ -165,10 +165,14 @@ bool Bin::operator==(Bin const &other) const
 {
     return (m_sval == other.get_sval() && m_ival == other.get_ival());
 }
-
+// TODO BUG!! REFACTOR 
 Bin Bin::operator+(Bin const &other) const
 {
+    throw NotImplementedYet();
     char carry {'0'};
+    bool this_neg {isneg(m_sval)};
+    bool other_neg {isneg(other.get_sval())};
+    
     std::string res_sval;
     std::string this_sval {rm_prefix(this->m_sval)};
     std::string other_sval {rm_prefix(other.get_sval())};
@@ -248,7 +252,11 @@ Bin Bin::operator+(Bin const &other) const
     }
     // ----------------------------------------------------------------------
     std::reverse(res_sval.begin(), res_sval.end());
-    return Bin{POS_BIN_PREFIX  + res_sval};
+    
+    if (this_neg && other_neg)
+        return Bin{NEG_BIN_PREFIX  + res_sval};
+    else if (!this_neg && !other_neg)
+        return Bin{POS_BIN_PREFIX + res_sval};
 }
 
 Bin Bin::operator-(Bin const &other) const
@@ -353,7 +361,7 @@ std::string dec(std::string num)
         throw InvalidLiteral();
 }
 
-std::string dec(std::string num, int base)
+std::string to_dec(std::string num, int base)
 {
     switch (base)
     {
@@ -438,8 +446,18 @@ std::string dec_to_any(std::string dec_snum, int base_to)
     bool neg {isneg(dec_snum)};
     if (neg) dec_snum.erase(dec_snum.begin());
 
-    std::string res_num;
+    std::string res_snum;
+    int dec_inum {std::stoi(dec_snum)};
 
+    for (;dec_inum != 0; dec_inum /= base_to)
+    {
+        int remainder {dec_inum % base_to};
+        res_snum.push_back(g_dec_to_hex_table.at((std::to_string(remainder))));
+    }
+
+    std::reverse(res_snum.begin(), res_snum.end());
+    drop_zeros(res_snum);
+    return neg ? "-" + res_snum : res_snum;
 }
 
 /*****************************************************************
@@ -457,8 +475,8 @@ std::string oct_to_bin(std::string oct_num)
     {
         bin_num.append(g_oct_to_bin_table.at(dig));
     }
-    drop_zeros(bin_num);
 
+    drop_zeros(bin_num);
     return neg ? NEG_BIN_PREFIX + bin_num : POS_BIN_PREFIX + bin_num;
 }
 
@@ -477,9 +495,9 @@ std::string dec_to_bin(std::string dec_snum)
         int remainder {dec_inum % BINARY};
         bin_num.push_back(itoc(remainder));
     }
+
     std::reverse(bin_num.begin(), bin_num.end());
     drop_zeros(bin_num);
-
     return neg ? NEG_BIN_PREFIX + bin_num : POS_BIN_PREFIX + bin_num;
 }
 
@@ -508,7 +526,7 @@ std::string bin_to_oct(std::string bin_num)
     if (bin_num == BIN_ZERO) return OCT_ZERO;
     bool neg {isneg(bin_num)};
     bin_num = rm_prefix(bin_num);
-    
+
     // First convert binary into decimal;
     std::string dec_snum { neg ? "-" + bin_to_dec(bin_num) : bin_to_dec(bin_num)};
     // Now let's convert decimal to octal

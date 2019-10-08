@@ -1,7 +1,7 @@
 #include "numconv.h"
 #include <gtest/gtest.h>
 
-// bin() function tests.
+// bin(std::string) function tests.
 /******************************************************/
 TEST(test_bin_function, binary_values)
 {
@@ -28,7 +28,7 @@ TEST(test_bin_function, hexadecimal_values)
     ASSERT_EQ("0b110001", bin("0x31"));
 }
 /******************************************************/
-// oct() function tests.
+// oct(std::string) function tests.
 /******************************************************/
 TEST(test_oct_function, binary_values)
 {
@@ -82,30 +82,54 @@ TEST(test_dec_function, hexadecimal_values)
     ASSERT_EQ("308", dec("0x134"));
 }
 /******************************************************/
-// dec(std::string, int base) function tests.
+// to_dec(std::string, int base) function tests.
 /******************************************************/
-TEST(test_dec_function, different_bases)
+TEST(test_to_dec_function, different_bases)
 {
-    ASSERT_EQ("0", dec("0", 9));
-    ASSERT_EQ("-5", dec("-12", 3));
-    ASSERT_EQ("6", dec("12", 4));
-    ASSERT_EQ("-7", dec("-12", 5));
-    ASSERT_EQ("8", dec("12", 6));
-    ASSERT_EQ("9", dec("12", 7));
-    ASSERT_EQ("-11", dec("-12", 9));
-    ASSERT_EQ("13", dec("12", 11));
-    ASSERT_EQ("-14", dec("-12", 12));
-    ASSERT_EQ("15", dec("12", 13));
-    ASSERT_EQ("-16", dec("-12", 14));
-    ASSERT_EQ("17", dec("12", 15));
+    ASSERT_EQ("0", to_dec("0", 9));
+    ASSERT_EQ("-5", to_dec("-12", 3));
+    ASSERT_EQ("6", to_dec("12", 4));
+    ASSERT_EQ("-7", to_dec("-12", 5));
+    ASSERT_EQ("8", to_dec("12", 6));
+    ASSERT_EQ("9", to_dec("12", 7));
+    ASSERT_EQ("-11", to_dec("-12", 9));
+    ASSERT_EQ("13", to_dec("12", 11));
+    ASSERT_EQ("-14", to_dec("-12", 12));
+    ASSERT_EQ("15", to_dec("12", 13));
+    ASSERT_EQ("-16", to_dec("-12", 14));
+    ASSERT_EQ("17", to_dec("12", 15));
 
-    ASSERT_EQ("6", dec("0110", 2));
-    ASSERT_EQ("19", dec("23", 8));
-    ASSERT_EQ("10", dec("10", 10));
-    ASSERT_EQ("161", dec("A1", 16));
+    ASSERT_EQ("6", to_dec("0110", 2));
+    ASSERT_EQ("19", to_dec("23", 8));
+    ASSERT_EQ("10", to_dec("10", 10));
+    ASSERT_EQ("161", to_dec("A1", 16));
 }
 /******************************************************/
-// hex() function tests.
+// dec_to(std::string, int base_to) function tests.
+/******************************************************/
+TEST(test_dec_to_function, different_bases)
+{
+    ASSERT_EQ("0", dec_to("0", 9));
+    ASSERT_EQ("-110", dec_to("-12", 3));
+    ASSERT_EQ("30", dec_to("12", 4));
+    ASSERT_EQ("-22", dec_to("-12", 5));
+    ASSERT_EQ("20", dec_to("12", 6));
+    ASSERT_EQ("15", dec_to("12", 7));
+    ASSERT_EQ("-13", dec_to("-12", 9));
+    ASSERT_EQ("11", dec_to("12", 11));
+    ASSERT_EQ("-10", dec_to("-12", 12));
+
+    ASSERT_EQ("C", dec_to("12", 13));
+    ASSERT_EQ("-C", dec_to("-12", 14));
+    ASSERT_EQ("C", dec_to("12", 15));
+
+    ASSERT_EQ("0b110", dec_to("6", 2));
+    ASSERT_EQ("0o23", dec_to("19", 8));
+    ASSERT_EQ("10", dec_to("10", 10));
+    ASSERT_EQ("0xA1", dec_to("161", 16));
+}
+/******************************************************/
+// hex(std::string) function tests.
 /******************************************************/
 TEST(test_hex_function, binary_values)
 {
@@ -134,13 +158,20 @@ TEST(test_hex_function, hexadecimal_values)
 /******************************************************/
 // Bin{} class + operator test.
 /******************************************************/
-TEST(test_Bin_class, plus_operator)
-{
-    ASSERT_EQ("0b0", (Bin("0") + Bin("0")).get_sval());
-    ASSERT_EQ("0b111101", (Bin("20") + Bin("41")).get_sval());
-    ASSERT_EQ("0b10000101", (Bin("11") + Bin("122")).get_sval());
-    ASSERT_EQ("0b11011110", (Bin("111") + Bin("111")).get_sval());
-}
+// TEST(test_Bin_class, plus_operator)
+// {
+//     ASSERT_EQ("0b0", (Bin("0") + Bin("0")).get_sval());
+//     ASSERT_EQ("0b111101", (Bin("20") + Bin("41")).get_sval());
+//     ASSERT_EQ("0b10000101", (Bin("11") + Bin("122")).get_sval());
+//     ASSERT_EQ("-0b10000101", (Bin("-11") + Bin("-122")).get_sval());
+//     ASSERT_EQ("0b11011110", (Bin("111") + Bin("111")).get_sval());
+
+//     ASSERT_EQ("0b0", (Bin(0) + Bin(0)).get_sval());
+//     ASSERT_EQ("0b111101", (Bin(20) + Bin(41)).get_sval());
+//     ASSERT_EQ("0b10000101", (Bin(11) + Bin(122)).get_sval());
+//     ASSERT_EQ("-0b10000101", (Bin(-11) + Bin(-122)).get_sval());
+//     ASSERT_EQ("0b11011110", (Bin(111) + Bin(111)).get_sval());
+// }
 TEST(test_Bin_class, minus_operator)
 {
     ASSERT_EQ("0b0", (Bin("0") - Bin("0")).get_sval());
@@ -148,6 +179,12 @@ TEST(test_Bin_class, minus_operator)
     ASSERT_EQ("0b10010111", (Bin("180") - Bin("29")).get_sval());
     ASSERT_EQ("-0b11110", (Bin("132") - Bin("162")).get_sval());
     ASSERT_EQ("-0b11011110", (Bin("-111") - Bin("111")).get_sval());
+
+    ASSERT_EQ("0b0", (Bin(0) - Bin(0)).get_sval());
+    ASSERT_EQ("0b1", (Bin(42) - Bin(41)).get_sval());
+    ASSERT_EQ("0b10010111", (Bin(180) - Bin(29)).get_sval());
+    ASSERT_EQ("-0b11110", (Bin(132) - Bin(162)).get_sval());
+    ASSERT_EQ("-0b11011110", (Bin(-111) - Bin(111)).get_sval());
 }
 /******************************************************/
 int main(int argc, char **argv)
