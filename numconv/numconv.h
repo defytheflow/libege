@@ -18,24 +18,22 @@ class Bin
         std::string get_sval() const;
 
         /* Overloaded Operators */
+        bool operator==(Bin const &other) const;
         Bin operator+(Bin const &other) const;
         Bin operator-(Bin const &other) const;
         Bin operator*(Bin const &other) const;
         Bin operator/(Bin const &other) const;
         friend std::ostream& operator<<(std::ostream &os, const Bin &b);
+
+        /* Other methods */
+        int count(char ch) const;
 };
 
-class Oct
-{
-
-};
-
-class Hex
-{
-
-};
+class Hex{};
 
 std::string bin(std::string num);
 std::string oct(std::string num);
 std::string dec(std::string num);
+std::string dec(std::string num, int base);
 std::string hex(std::string num);
+

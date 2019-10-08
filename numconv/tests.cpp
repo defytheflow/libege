@@ -109,7 +109,24 @@ TEST(test_hex_function, hexadecimal_values)
     ASSERT_EQ("0x12345", hex("0x12345"));
 }   
 /******************************************************/
-
+// Bin{} class + operator test.
+/******************************************************/
+TEST(test_Bin_class, plus_operator)
+{
+    ASSERT_EQ("0b0", (Bin("0") + Bin("0")).get_sval());
+    ASSERT_EQ("0b111101", (Bin("20") + Bin("41")).get_sval());
+    ASSERT_EQ("0b10000101", (Bin("11") + Bin("122")).get_sval());
+    ASSERT_EQ("0b11011110", (Bin("111") + Bin("111")).get_sval());
+}
+TEST(test_Bin_class, minus_operator)
+{
+    ASSERT_EQ("0b0", (Bin("0") - Bin("0")).get_sval());
+    ASSERT_EQ("0b1", (Bin("42") - Bin("41")).get_sval());
+    ASSERT_EQ("0b10010111", (Bin("180") - Bin("29")).get_sval());
+    ASSERT_EQ("-0b11110", (Bin("132") - Bin("162")).get_sval());
+    ASSERT_EQ("-0b11011110", (Bin("-111") - Bin("111")).get_sval());
+}
+/******************************************************/
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);

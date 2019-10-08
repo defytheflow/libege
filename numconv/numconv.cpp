@@ -73,7 +73,7 @@ bool isdec(const std::string &num);
 bool ishex(const std::string &num);
 
 // Erases first two characters if number is pos or first three chars if number is neg
-void rm_prefix(std::string &num);
+std::string rm_prefix(std::string num);
 
 // Returns true if num starts with any of POS_PREFIX.
 bool hasprefix(std::string &num);
@@ -95,6 +95,9 @@ class InvalidLiteral {};
 /*****************************************************************
  *               IMPLEMENTATION OF MAIN CLASSES                  *
  *****************************************************************/ 
+
+/* CONSTRUCTORS */
+
 Bin::Bin() {}
 // This constructor is used if number to convert is passed as a string
 Bin::Bin(std::string val)
@@ -102,22 +105,107 @@ Bin::Bin(std::string val)
     m_sval = bin(val);
     m_ival = std::stoi(dec(m_sval));
 }
-// This constructor is udef if number to convert is passed as an int
+// This constructor is used if number to convert is passed as an int
 Bin::Bin(int val)
 {
     m_sval = bin(std::to_string(val));
     m_ival = std::stoi(dec(m_sval));
 }
-// Getters
+/* GETTERS */
+
 int Bin::get_ival() const { return m_ival; }
 std::string Bin::get_sval() const { return m_sval; }
 
-// Overloaded operators
+/*  OVERLOADED OPERATORS */
+
+bool Bin::operator==(Bin const &other) const
+{
+    return (m_sval == other.get_sval() && m_ival == other.get_ival());
+}
+
 Bin Bin::operator+(Bin const &other) const
 {
-    std::string val;
-    val = bin(std::to_string(this->get_ival() + other.get_ival()));
-    return Bin{val};
+    char carry {'0'};
+    std::string res_sval;
+    std::string this_sval {rm_prefix(this->m_sval)};
+    std::string other_sval {rm_prefix(other.get_sval())};
+    // ---------------------------------------------------------------------
+    // Make them eqal in length by padding zeros in front of the lesser one.
+    while (other_sval.length() < this_sval.length())
+    {
+        other_sval.insert(0, "0");
+    }
+    while (this_sval.length() < other_sval.length())
+    {
+        this_sval.insert(0, "0");
+    }
+    // ----------------------------------------------------------------------
+    std::reverse(this_sval.begin(), this_sval.end());
+    std::reverse(other_sval.begin(), other_sval.end());
+    // ----------------------------------------------------------------------
+    for (int i = 0, length = this_sval.length(); i < length; ++i)
+    {
+        if (this_sval[i] == '0' && other_sval[i] == '0')
+        {
+            switch (carry)
+            {
+                case '0':
+                    res_sval.push_back('0');
+                    break;
+                case '1':
+                    res_sval.push_back('1');
+                    carry = '0';
+                    break;
+            }
+        }
+        else if (this_sval[i] == '0' && other_sval[i] == '1')
+        {
+            switch (carry)
+            {
+                case '0':
+                    res_sval.push_back('1');
+                    break;
+                case '1':
+                    res_sval.push_back('0');
+                    carry = '1';
+                    break;
+            }
+        }
+        else if (this_sval[i] == '1' && other_sval[i] == '0')
+        {
+            switch (carry)
+            {
+                case '0':
+                    res_sval.push_back('1');
+                    break;
+                case '1':
+                    res_sval.push_back('0');
+                    carry = '1';
+                    break;
+            }
+        }
+        else if (this_sval[i] == '1' && other_sval[i] == '1')
+        {
+            switch (carry)
+            {
+                case '0':
+                    res_sval.push_back('0');
+                    carry = '1';
+                    break;
+                case '1':
+                    res_sval.push_back('1');
+                    carry = '1';
+                    break;
+            }
+        }
+    }
+    if (carry == '1')
+    {
+        res_sval.push_back('1');
+    }
+    // ----------------------------------------------------------------------
+    std::reverse(res_sval.begin(), res_sval.end());
+    return Bin{POS_BIN_PREFIX  + res_sval};
 }
 
 Bin Bin::operator-(Bin const &other) const
@@ -146,6 +234,21 @@ std::ostream& operator<<(std::ostream &os, const Bin &b)
     os << b.m_sval;
     return os;
 }
+/* OTHER METHODS */
+
+// Some tasks ask you to count '1' or '0' in the binary form of a particular number.
+int Bin::count(char what) const
+{
+    int count {};
+    std::string sval = rm_prefix(m_sval);
+    for (const char &dig : sval)
+    {
+        if (dig == what)
+            ++count;
+    }
+    return count;
+}
+
 /*****************************************************************
  *           DEFINITIONS OF MAIN PUBLIC FUNCTIONS                *
  *****************************************************************/ 
@@ -193,6 +296,27 @@ std::string dec(std::string num)
         throw InvalidLiteral();
 }
 
+std::string dec(std::string num, int base)
+{
+    switch (base)
+    {
+        case 2:
+            return bin(isneg(num) ? NEG_BIN_PREFIX + num.substr(1, num.length()-1) : POS_BIN_PREFIX + num);
+        case 8:
+            return oct(isneg(num) ? NEG_OCT_PREFIX + num.substr(1, num.length()-1) : POS_OCT_PREFIX + num);
+        case 10: // We checl whether the literal user passed is really in base 10 and only then return it.
+            return dec(num);
+        case 16:
+            return hex(isneg(num) ? NEG_HEX_PREFIX + num.substr(1, num.length()-1) : POS_HEX_PREFIX + num);
+        case 1: case 3: case 4: case 5:
+        case 6: case 7: case 9: case 11:
+        case 12: case 13: case 14: case 15:
+            any_to_dec(num, base);
+        default:
+            throw InvalidBase();
+    }
+}
+
 std::string hex(std::string num)
 {
     if (isbin(num))
@@ -215,7 +339,7 @@ std::string oct_to_bin(std::string oct_num)
 {
     if (oct_num == OCT_ZERO) return BIN_ZERO;
     bool neg {isneg(oct_num)};
-    rm_prefix(oct_num);
+    oct_num = rm_prefix(oct_num);
 
     std::string bin_num;
     std::map<char, std::string> oct_to_bin_table = {
@@ -259,7 +383,7 @@ std::string hex_to_bin(std::string hex_num)
 {
     if (hex_num == HEX_ZERO) return BIN_ZERO;
     bool neg {isneg(hex_num)};
-    rm_prefix(hex_num);
+    hex_num = rm_prefix(hex_num);
 
     std::string bin_num;
     std::map<char, std::string> hex_to_bin_table = {
@@ -285,7 +409,7 @@ std::string bin_to_oct(std::string bin_num)
 {
     if (bin_num == BIN_ZERO) return OCT_ZERO;
     bool neg {isneg(bin_num)};
-    rm_prefix(bin_num);
+    bin_num = rm_prefix(bin_num);
     // First convert binary into decimal;
     std::string dec_num_s { neg ? "-" + bin_to_dec(bin_num) : bin_to_dec(bin_num)};
     // Now let's convert decimal to octal
@@ -319,7 +443,7 @@ std::string hex_to_oct(std::string hex_num)
 {
     if (hex_num == HEX_ZERO) return OCT_ZERO;
     bool neg {isneg(hex_num)};
-    rm_prefix(hex_num);
+    hex_num = rm_prefix(hex_num);
     std::string dec_num_s {neg ? "-" + hex_to_dec(hex_num) : hex_to_dec(hex_num)};
     return dec_to_oct(dec_num_s);
 }
@@ -332,7 +456,7 @@ std::string bin_to_dec(std::string bin_num)
 {
     if (bin_num == BIN_ZERO) return "0";
     bool neg {isneg(bin_num)};
-    rm_prefix(bin_num);
+    bin_num = rm_prefix(bin_num);
     int dec_num_i {};
     std::reverse(bin_num.begin(), bin_num.end());
     for (int i {0}, length = bin_num.length(); i < length; ++i)
@@ -347,7 +471,7 @@ std::string oct_to_dec(std::string oct_num)
 {
     if (oct_num == OCT_ZERO) return "0";
     bool neg {isneg(oct_num)};
-    rm_prefix(oct_num);
+    oct_num = rm_prefix(oct_num);
     int dec_num_i {};
     std::reverse(oct_num.begin(), oct_num.end());
     for (int i {0}, length = oct_num.length(); i < length; ++i)
@@ -362,7 +486,7 @@ std::string hex_to_dec(std::string hex_num)
 {
     if (hex_num == BIN_ZERO) return "0";
     bool neg {isneg(hex_num)};
-    rm_prefix(hex_num);
+    hex_num = rm_prefix(hex_num);
     int dec_num_i {};
     std::map<char, std::string> hex_to_dec_table = {
         {'0', "0"}, {'1', "1"}, {'2', "2"}, {'3', "3"},
@@ -387,7 +511,7 @@ std::string bin_to_hex(std::string bin_num)
 {
     if (bin_num == BIN_ZERO) return HEX_ZERO;
     bool neg {isneg(bin_num)};
-    rm_prefix(bin_num);
+    bin_num = rm_prefix(bin_num);
     std::string hex_num;
     std::map<std::string, char> bin_to_hex_table = {
         {"0000", '0'}, {"0001", '1'}, {"0010", '2'}, {"0011", '3'},
@@ -408,7 +532,7 @@ std::string oct_to_hex(std::string oct_num)
 {
     if (oct_num == OCT_ZERO) return HEX_ZERO;
     bool neg {isneg(oct_num)};
-    rm_prefix(oct_num);
+    oct_num = rm_prefix(oct_num);
     std::string bin_num {neg ? "-" + oct_to_bin(oct_num) : oct_to_bin(oct_num)};
     bin_num = pad_zeros(bin_num);
     return bin_to_hex(bin_num);
@@ -589,7 +713,7 @@ bool ishex(const std::string &num)
     return true;
 }
 
-void rm_prefix(std::string &num)
+std::string rm_prefix(std::string num)
 {
     std::string prefix;
     if (isneg(num))
@@ -597,19 +721,20 @@ void rm_prefix(std::string &num)
         prefix = num.substr(0, 3); // '-0b', '-0o', '-0x'
         if (prefix == NEG_BIN_PREFIX || prefix == NEG_OCT_PREFIX || prefix == NEG_HEX_PREFIX)
         {
-            num.erase(num.begin());
-            num.erase(num.begin());
-            num.erase(num.begin());
+            for (int _ = 0; _ < 3; ++_)
+                num.erase(num.begin());
         }
+        return num;
     }   
     else
     {
         prefix = num.substr(0, 2); // '0b', '0o', '0x'
         if (prefix == POS_BIN_PREFIX || prefix == POS_OCT_PREFIX || prefix == POS_HEX_PREFIX)
         {
-            num.erase(num.begin());
-            num.erase(num.begin());
+            for (int _ = 0; _ < 2; ++_)
+                num.erase(num.begin());
         }
+        return num;
     }
 }
 // TODO maybe a bug here: 'Why does it check only positive prefixes?'
