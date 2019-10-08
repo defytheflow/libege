@@ -156,35 +156,37 @@ TEST(test_hex_function, hexadecimal_values)
     ASSERT_EQ("0x12345", hex("0x12345"));
 }   
 /******************************************************/
-// Bin{} class + operator test.
+// Bin{} class tests.
 /******************************************************/
-// TEST(test_Bin_class, plus_operator)
-// {
-//     ASSERT_EQ("0b0", (Bin("0") + Bin("0")).get_sval());
-//     ASSERT_EQ("0b111101", (Bin("20") + Bin("41")).get_sval());
-//     ASSERT_EQ("0b10000101", (Bin("11") + Bin("122")).get_sval());
-//     ASSERT_EQ("-0b10000101", (Bin("-11") + Bin("-122")).get_sval());
-//     ASSERT_EQ("0b11011110", (Bin("111") + Bin("111")).get_sval());
-
-//     ASSERT_EQ("0b0", (Bin(0) + Bin(0)).get_sval());
-//     ASSERT_EQ("0b111101", (Bin(20) + Bin(41)).get_sval());
-//     ASSERT_EQ("0b10000101", (Bin(11) + Bin(122)).get_sval());
-//     ASSERT_EQ("-0b10000101", (Bin(-11) + Bin(-122)).get_sval());
-//     ASSERT_EQ("0b11011110", (Bin(111) + Bin(111)).get_sval());
-// }
-TEST(test_Bin_class, minus_operator)
+TEST(test_Bin_class, plus_operator)
 {
-    ASSERT_EQ("0b0", (Bin("0") - Bin("0")).get_sval());
-    ASSERT_EQ("0b1", (Bin("42") - Bin("41")).get_sval());
-    ASSERT_EQ("0b10010111", (Bin("180") - Bin("29")).get_sval());
-    ASSERT_EQ("-0b11110", (Bin("132") - Bin("162")).get_sval());
-    ASSERT_EQ("-0b11011110", (Bin("-111") - Bin("111")).get_sval());
+    ASSERT_EQ("0b0", (Bin("0") + Bin("0")).get_sval());
+    ASSERT_EQ("0b111101", (Bin("20") + Bin("41")).get_sval());
+    ASSERT_EQ("-0b10000101", (Bin("-11") + Bin("-122")).get_sval());
+    ASSERT_EQ("0b1101111", (Bin("-11") + Bin("122")).get_sval());
+    ASSERT_EQ("0b0", (Bin("111") + Bin("-111")).get_sval());
 
-    ASSERT_EQ("0b0", (Bin(0) - Bin(0)).get_sval());
-    ASSERT_EQ("0b1", (Bin(42) - Bin(41)).get_sval());
-    ASSERT_EQ("0b10010111", (Bin(180) - Bin(29)).get_sval());
-    ASSERT_EQ("-0b11110", (Bin(132) - Bin(162)).get_sval());
-    ASSERT_EQ("-0b11011110", (Bin(-111) - Bin(111)).get_sval());
+    ASSERT_EQ("0b0", (Bin(0) + Bin(0)).get_sval());
+    ASSERT_EQ("0b111101", (Bin(20) + Bin(41)).get_sval());
+    ASSERT_EQ("-0b10000101", (Bin(-11) + Bin(-122)).get_sval());
+    ASSERT_EQ("0b1101111", (Bin(-11) + Bin(122)).get_sval());
+    ASSERT_EQ("0b0", (Bin(111) + Bin(-111)).get_sval());
+
+    ASSERT_EQ("0b10101", (Bin("0xA") + Bin("0xB")).get_sval());
+    ASSERT_EQ("0b1101", (Bin("0o6") + Bin("0o7")).get_sval());
+    ASSERT_EQ("0b10100", (Bin("0b1010") + Bin("0b1010")).get_sval());
+}
+TEST(test_Bin_class, equals_operator)
+{
+    ASSERT_TRUE(Bin("0") == Bin("0"));
+    ASSERT_TRUE(Bin("0b11") == Bin("0b11"));
+    ASSERT_TRUE(Bin(24) == Bin(24));
+    ASSERT_TRUE(Bin(-31) == Bin(-31));
+    ASSERT_TRUE(Bin("0o22") == Bin("0o22"));
+    ASSERT_TRUE(Bin("0b0") == Bin(0));
+    ASSERT_TRUE(Bin("0x2") == Bin("0o2"));
+    ASSERT_TRUE(Bin("0b1010") == Bin(10));
+    ASSERT_TRUE(Bin(-3456) == Bin("-3456"));
 }
 /******************************************************/
 int main(int argc, char **argv)
