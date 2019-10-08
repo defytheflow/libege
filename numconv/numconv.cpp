@@ -58,24 +58,28 @@ const std::map<char, std::string> g_oct_to_bin_table = {
 /* Conversion functions cope string value because they
     do prefix manipulation on it. */
 
-// Functions to convert a number to BINARY.
+/* Functions to convert a number to BINARY.  */
 std::string oct_to_bin(std::string oct_num);
 std::string dec_to_bin(std::string dec_snum);
 std::string hex_to_bin(std::string hex_num);
 
-// Functions to convert a number to OCTAL.
+/* Functions to convert a number to OCTAL.   */
 std::string bin_to_oct(std::string bin_num);
 std::string dec_to_oct(std::string dec_snum);
 std::string hex_to_oct(std::string hex_num);
 
-// Functions to convert a number to DECIMAL.
+/* Functions to convert a number to DECIMAL. */
 std::string bin_to_dec(std::string bin_num);
 std::string oct_to_dec(std::string oct_num);
 std::string hex_to_dec(std::string hex_num);
+
+/* Functions to convert between DECIMAL and bases [2-F] */
 // Converts [2-F] bases to DECIMAL 
 std::string any_to_dec(std::string snum, int base);
+// Converts DECIMAL to [2-F] bases  
+std::string dec_to_any(std::string dec_snum, int base_to);
 
-// Functions to convert a number to HEXADECIMAL.
+/* Functions to convert a number to HEXADECIMAL. */
 std::string bin_to_hex(std::string bin_num);
 std::string oct_to_hex(std::string oct_num);
 std::string dec_to_hex(std::string dec_snum);
@@ -321,6 +325,20 @@ std::string oct(std::string num)
         throw InvalidLiteral();
 }
 
+std::string hex(std::string num)
+{
+    if (isbin(num))
+        return bin_to_hex(num);
+    else if (isoct(num))
+        return oct_to_hex(num);
+    else if (isdec(num))
+        return dec_to_hex(num);
+    else if (ishex(num))
+        return num;
+    else
+        throw InvalidLiteral();
+}
+
 std::string dec(std::string num)
 {
     if (isbin(num))
@@ -362,22 +380,34 @@ std::string dec(std::string num, int base)
     }
 }
 
-std::string hex(std::string num)
+std::string dec_to(std::string dec_num, int base_to)
 {
-    if (isbin(num))
-        return bin_to_hex(num);
-    else if (isoct(num))
-        return oct_to_hex(num);
-    else if (isdec(num))
-        return dec_to_hex(num);
-    else if (ishex(num))
-        return num;
-    else
-        throw InvalidLiteral();
+    if (isdec(dec_num))
+    {
+        switch (base_to)
+        {
+            case 2:
+                return bin(dec_num);
+            case 8:
+                return oct(dec_num);
+            case 10:
+                return dec_num;
+            case 16:
+                return hex(dec_num);
+            case 3: case 4: case 5:
+            case 6: case 7: case 9:
+            case 11: case 12: case 13: 
+            case 14: case 15:
+                return dec_to_any(dec_num, base_to);
+            default:
+                throw InvalidBase();
+        }    
+    }
+    throw InvalidLiteral();
 }
 
 /*****************************************************************
- *           (ANY BASE FROM 1 THROUGH 16) -> DECIMAL             *
+ *           (ANY BASE FROM 2 THROUGH 16) -> DECIMAL             *
  *****************************************************************/ 
 
 std::string any_to_dec(std::string snum, int base)
@@ -396,6 +426,20 @@ std::string any_to_dec(std::string snum, int base)
 
     std::string dec_snum {std::to_string(dec_inum)};
     return neg ? "-" + dec_snum : dec_snum;
+}
+
+/*****************************************************************
+ *           (  DECIMAL -> ANY BASE FROM 2 THROUGH 16)           *
+ *****************************************************************/ 
+
+std::string dec_to_any(std::string dec_snum, int base_to)
+{
+    if (dec_snum == "0") return "0";
+    bool neg {isneg(dec_snum)};
+    if (neg) dec_snum.erase(dec_snum.begin());
+
+    std::string res_num;
+
 }
 
 /*****************************************************************
@@ -422,14 +466,11 @@ std::string dec_to_bin(std::string dec_snum)
 {
     if (dec_snum == "0") return BIN_ZERO;
     bool neg {isneg(dec_snum)};
-    std::string bin_num;
-    int dec_inum {};
+    if (neg) dec_snum.erase(dec_snum.begin());
 
-    if (neg) // Ignore first '-' character when trasformins string into an int
-        dec_inum = std::stoi(dec_snum.substr(1, dec_snum.length()-1));
-    else
-        dec_inum = std::stoi(dec_snum);
-   
+    std::string bin_num;
+    int dec_inum {std::stoi(dec_snum)};
+
     // Collect all the remainders
     for (;dec_inum != 0; dec_inum /= BINARY)
     {
@@ -467,6 +508,7 @@ std::string bin_to_oct(std::string bin_num)
     if (bin_num == BIN_ZERO) return OCT_ZERO;
     bool neg {isneg(bin_num)};
     bin_num = rm_prefix(bin_num);
+    
     // First convert binary into decimal;
     std::string dec_snum { neg ? "-" + bin_to_dec(bin_num) : bin_to_dec(bin_num)};
     // Now let's convert decimal to octal
@@ -477,15 +519,12 @@ std::string dec_to_oct(std::string dec_snum)
 {
     if (dec_snum == "0") return OCT_ZERO;
     bool neg {isneg(dec_snum)};
+    if (neg) dec_snum.erase(dec_snum.begin());
+
     std::string oct_num;
+    int dec_inum {std::stoi(dec_snum)};
+
     // Collect all the remainders
-    int dec_inum {};
-
-    if (neg) // Ignore first '-' character when trasformins string into an int
-        dec_inum = std::stoi(dec_snum.substr(1, dec_snum.length()-1));
-    else
-        dec_inum = std::stoi(dec_snum);
-
     for (;dec_inum != 0; dec_inum /= OCTAL)
     {
         int remainder {dec_inum % OCTAL};
@@ -501,6 +540,7 @@ std::string hex_to_oct(std::string hex_num)
     if (hex_num == HEX_ZERO) return OCT_ZERO;
     bool neg {isneg(hex_num)};
     hex_num = rm_prefix(hex_num);
+
     std::string dec_snum {neg ? "-" + hex_to_dec(hex_num) : hex_to_dec(hex_num)};
     return dec_to_oct(dec_snum);
 }
@@ -514,12 +554,15 @@ std::string bin_to_dec(std::string bin_num)
     if (bin_num == BIN_ZERO) return "0";
     bool neg {isneg(bin_num)};
     bin_num = rm_prefix(bin_num);
+
     int dec_inum {};
     std::reverse(bin_num.begin(), bin_num.end());
+
     for (int i {0}, length = bin_num.length(); i < length; ++i)
     {
         dec_inum += ctoi(bin_num[i]) * std::pow(BINARY, i);
     }
+
     std::string dec_snum {std::to_string (dec_inum)};
     return neg ? "-" + dec_snum : dec_snum;
 }
@@ -529,12 +572,15 @@ std::string oct_to_dec(std::string oct_num)
     if (oct_num == OCT_ZERO) return "0";
     bool neg {isneg(oct_num)};
     oct_num = rm_prefix(oct_num);
+
     int dec_inum {};
     std::reverse(oct_num.begin(), oct_num.end());
+
     for (int i {0}, length = oct_num.length(); i < length; ++i)
     {
         dec_inum += ctoi(oct_num[i]) * std::pow(OCTAL, i);
     }
+
     std::string dec_snum {std::to_string (dec_inum)};
     return neg ? "-" + dec_snum : dec_snum;
 }
@@ -544,12 +590,15 @@ std::string hex_to_dec(std::string hex_num)
     if (hex_num == BIN_ZERO) return "0";
     bool neg {isneg(hex_num)};
     hex_num = rm_prefix(hex_num);
+
     int dec_inum {};
     std::reverse(hex_num.begin(), hex_num.end());
+
     for (int i {0}, length = hex_num.length(); i < length; ++i)
     {
         dec_inum += stoi(g_hex_to_dec_table.at(hex_num[i])) * std::pow(HEXADECIMAL, i);
     }
+
     std::string dec_snum {std::to_string (dec_inum)};
     return neg ? "-" + dec_snum : dec_snum;
 }
@@ -563,13 +612,16 @@ std::string bin_to_hex(std::string bin_num)
     if (bin_num == BIN_ZERO) return HEX_ZERO;
     bool neg {isneg(bin_num)};
     bin_num = rm_prefix(bin_num);
+
     std::string hex_num;
     bin_num = pad_zeros(bin_num);
+
     // TODO bug might be in start < length - start <= length
     for (int start {0}, length = bin_num.length(); start < length; start += 4)
     {
         hex_num.push_back(g_bin_to_hex_table.at(bin_num.substr(start, 4)));
     }
+
     return neg ? NEG_HEX_PREFIX + hex_num : POS_HEX_PREFIX + hex_num;
 }
 
@@ -578,6 +630,7 @@ std::string oct_to_hex(std::string oct_num)
     if (oct_num == OCT_ZERO) return HEX_ZERO;
     bool neg {isneg(oct_num)};
     oct_num = rm_prefix(oct_num);
+
     std::string bin_num {neg ? "-" + oct_to_bin(oct_num) : oct_to_bin(oct_num)};
     bin_num = pad_zeros(bin_num);
     return bin_to_hex(bin_num);
@@ -586,14 +639,11 @@ std::string oct_to_hex(std::string oct_num)
 std::string dec_to_hex(std::string dec_snum)
 {
     if (dec_snum == "0") return HEX_ZERO;
-    bool neg {isneg(dec_snum)};   
-    std::string hex_num;
+    bool neg {isneg(dec_snum)};
+    if (neg) dec_snum.erase(dec_snum.begin());
 
-    int dec_inum {};
-    if (neg) // Ignore first '-' character when trasformins string into an int
-        dec_inum = std::stoi(dec_snum.substr(1, dec_snum.length()-1));
-    else
-        dec_inum = std::stoi(dec_snum);
+    std::string hex_num;
+    int dec_inum {std::stoi(dec_snum)};
 
     // Collect all the remainders
     for (;dec_inum != 0; dec_inum /= HEXADECIMAL)
@@ -601,6 +651,7 @@ std::string dec_to_hex(std::string dec_snum)
         int remainder {dec_inum % HEXADECIMAL};
         hex_num.push_back(g_dec_to_hex_table.at(std::to_string(remainder)));
     }
+
     std::reverse(hex_num.begin(), hex_num.end());
     return neg ? NEG_HEX_PREFIX + hex_num : POS_HEX_PREFIX + hex_num;
 }
