@@ -139,6 +139,10 @@ class InvalidBase {};
  *               IMPLEMENTATION OF MAIN CLASSES                  *
  *****************************************************************/ 
 
+/*****************************************************************
+ *                          Bin class                            *
+ *****************************************************************/ 
+
 /* CONSTRUCTORS */
 
 Bin::Bin() {}
@@ -154,8 +158,16 @@ Bin::Bin(int val)
 {
     m_pre_sval = bin(std::to_string(val));
     m_no_pre_sval = rm_prefix(m_pre_sval);
-    m_ival = std::stoi(dec(m_pre_sval));
+    m_ival = val;
 }
+// This constructor is used if Dec object is passed.
+Bin::Bin(Dec const &d)
+{
+    m_pre_sval = bin(d.get_sval());
+    m_no_pre_sval = rm_prefix(m_pre_sval);
+    m_ival = d.get_ival();
+}
+
 /* GETTERS */
 
 int Bin::get_ival() const { return m_ival; }
@@ -196,6 +208,46 @@ int Bin::count(char what) const
     }
     return count;
 }
+
+/*****************************************************************
+ *                          Dec class                            *
+ *****************************************************************/ 
+Dec::Dec() {}
+
+Dec::Dec(std::string val)
+{
+    m_sval = dec(val);
+    m_ival = std::stoi(m_sval);
+}
+
+Dec::Dec(int val)
+{
+    m_sval = dec(std::to_string(val));
+    m_ival = val;
+}
+
+Dec::Dec(std::string val, int base)
+{
+    m_sval = to_dec(val, base);
+    m_ival = std::stoi(m_sval);
+}
+
+bool Dec::operator==(Dec const &other) const { return  m_ival == other.get_ival(); }
+
+bool Dec::operator!=(Dec const &other) const { return m_ival != other.get_ival(); }
+
+Dec Dec::operator+(Dec const &other) const { return Dec{m_ival + other.get_ival()}; }
+
+Dec Dec::operator-(Dec const &other) const { return Dec{m_ival - other.get_ival()}; }
+
+Dec Dec::operator*(Dec const &other) const { return Dec{m_ival * other.get_ival()}; }
+
+Dec Dec::operator/(Dec const &other) const { return Dec{m_ival / other.get_ival()}; }
+
+std::ostream& operator<<(std::ostream &os, const Dec &d) { os << d.m_sval; return os; }
+
+int Dec::get_ival() const { return m_ival; }
+std::string Dec::get_sval() const { return m_sval; }
 
 /*****************************************************************
  *           DEFINITIONS OF MAIN PUBLIC FUNCTIONS                *
