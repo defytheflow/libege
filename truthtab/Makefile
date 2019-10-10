@@ -1,2 +1,2 @@
 all:
-	c++ -g -Wall main.cpp ../common.cpp -o main
+	c++ -g -Wall main.cpp ../common.cpp truthtab.cpp -o main
