@@ -2,7 +2,11 @@
 
 namespace dtf
 {
-    /* Constructors */
+
+/* Exceptions */
+    class IndexError {};
+
+/* Constructors */
     string::string()
     {
         m_capacity = 1;
@@ -24,13 +28,21 @@ namespace dtf
         dtf::strcpy(m_buffer, val, m_length);
     }
 
-    /* Destructor */
+/* Destructor */
     string::~string()
     {
         delete[] m_buffer;
     }
 
-     /* Overloaded concatenation ('+=') operator. */
+/* Subscription ('[]') operator.*/
+    char string::operator[](int index) const
+    {
+        if (index < 0 || index >= m_length)
+            throw IndexError();
+        return m_buffer[index];    
+    }
+
+/* Concatenation ('+=') operator. */
     dtf::string& string::operator+=(const char *other)
     {
         // Figure out the capacity and length
@@ -64,9 +76,9 @@ namespace dtf
         dtf::strcpy(m_buffer, temp_buffer, m_length);
     }
 
-     /* FRIENDS - Overloaded operators */
+/* FRIENDS - OVERLOADED OPERATORS */
 
-     /* Overloaded concatenation ('+') operator */
+ /* Concatenation ('+') operator */
     dtf::string operator+(const dtf::string &one, const dtf::string &other)
     {
         dtf::string res {one.m_length + other.m_length + 1}; // '\0' is added in the constructor
@@ -101,18 +113,38 @@ namespace dtf
         return res;
     }
 
-    /* Overloaded output ('<<') operator. */
+/* Equal operator ('==') */
+    bool operator==(const dtf::string &one, const dtf::string &other) 
+    { return dtf::strequal(one.m_buffer, other.m_buffer); }
+
+    bool operator==(const dtf::string &one, const char *other) 
+    { return dtf::strequal(one.m_buffer, other); }
+    
+    bool operator==(const char *one, const dtf::string &other) 
+    { return dtf::strequal(one, other.m_buffer); }
+
+/* Not equal ('!=') operator */
+    bool operator!=(const dtf::string &one, const dtf::string &other) 
+    { return !dtf::strequal(one.m_buffer, other.m_buffer); }
+
+    bool operator!=(const dtf::string &one, const char *other) 
+    { return !dtf::strequal(one.m_buffer, other); }
+    
+    bool operator!=(const char *one, const dtf::string &other) 
+    { return !dtf::strequal(one, other.m_buffer); }
+
+/* Output ('<<') operator. */
     std::ostream& operator<<(std::ostream &os, const dtf::string &str)
     {
         os << str.m_buffer;
         return os;
     }
 
-    /* Other methods */
+ /* Other methods */
     int string::length() const { return m_length; }
     int string::capacity() const { return m_capacity; }
 
-    /* PUBLIC HELPER FUNCTIONS. */
+/* PUBLIC HELPER FUNCTIONS. */
 
     /* Returns length of a c-string. */
     int strlen(const char *str)
@@ -133,6 +165,7 @@ namespace dtf
         dest[i] = '\0';
     }
 
+    /* Concatenates 'src' c-string to the 'dest' c-string */
     void strcat(char *dest, const char *src)
     {
         if (!dest || !src) return;
@@ -141,6 +174,24 @@ namespace dtf
         for (int j = 0, length = dtf::strlen(src); j < length; ++j, ++i)
             dest[i] = src[j];
         dest[i] = '\0';
+    }
+
+    /* Returns true if both c-strings are equal. */
+    bool strequal(const char *one, const char *other)
+    {
+        int one_length {strlen(one)};
+        int other_length {strlen(other)};
+        if (one_length != other_length)
+            return false;
+        int i{};
+        for (char ch1 = one[i], ch2 = other[i]; 
+            i < one_length; ++i, 
+            ch1 = one[i], ch2 = other[i])
+        {
+            if (one[i] != other[i]) 
+                return false;
+        }
+        return true;
     }   
 }
 

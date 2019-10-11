@@ -10,7 +10,7 @@ TEST(test_strlen_function, _)
     ASSERT_EQ(6, dtf::strlen("Artyom"));
 }
 
-TEST(test_strcpy_function, char_array)
+TEST(test_strcpy_function, _)
 {
     char dest[20];
     char src[15] = "Harry Potter!";
@@ -24,6 +24,27 @@ TEST(test_strcat_function, _)
     const char *surname = " Granger";
     dtf::strcat(dest, surname);
     ASSERT_STREQ(dest, "Hermione Granger");
+}
+
+TEST(test_strequal_function, _)
+{
+    const char *name = "Malfoy";
+    const char *other_name = "Malfoy";
+    ASSERT_TRUE(dtf::strequal(name, other_name));
+}
+
+TEST(test_dtf_string_class, equal_operator)
+{
+    ASSERT_TRUE(dtf::string("Ron") == "Ron");
+    ASSERT_TRUE("Ron" == dtf::string("Ron"));
+    ASSERT_TRUE(dtf::string("Ron") == dtf::string("Ron"));
+}
+
+TEST(test_dtf_string_class, notequal_operator)
+{
+    ASSERT_TRUE(dtf::string("Weasley") != "Granger");
+    ASSERT_TRUE("Weasley" != dtf::string("Malfoy"));
+    ASSERT_TRUE(dtf::string("Ron") != dtf::string("Draco"));
 }
 
 int main(int argc, char **argv)

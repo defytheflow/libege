@@ -5,7 +5,6 @@ using namespace std;
 int main()
 {
     dtf::string name {"Artyom"}, surname {"Danilov"}, thirdname {"Igorevich"};
-    dtf::string full_name = name + " " + surname + " " + thirdname;
-    full_name += " is a software developer.";
-    cout << full_name << endl;
+    cout << name[0] << " " << name[name.length() - 1] << endl;
+    cout << name[name.length()];
 }
