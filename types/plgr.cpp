@@ -4,8 +4,8 @@ using namespace std;
 
 int main()
 {
-    dtf::string name {"Artyom"};
-    cout << name << endl;
-    cout << "Length: " << name.length() << endl;
-    cout << "Capacity: " << name.capacity() << endl;
+    dtf::string name {"Artyom"}, surname {"Danilov"}, thirdname {"Igorevich"};
+    dtf::string full_name = name + " " + surname + " " + thirdname;
+    full_name += " is a software developer.";
+    cout << full_name << endl;
 }
